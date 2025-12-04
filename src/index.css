@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+
+/* Fix white bounce on scroll */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #0f172a; /* slate-900 - matches your dark theme */
+  overflow-x: hidden; /* Prevent horizontal scroll bounce */
+}
+
+body {
+  overscroll-behavior: none; /* Disable rubber band effect */
+  -webkit-overflow-scrolling: touch;
+}
+
+
+#root {
+  min-height: 100vh;
+  background-color: #0f172a;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+/* Add this to your index.css to match markdown excerpt background to PostCard */
+
+/* Force all markdown elements to have transparent background */
+.markdown-excerpt * {
+  background-color: transparent !important;
+  background: none !important;
+}
+
+/* Keep subtle background for code elements */
+.markdown-excerpt code {
+  background-color: rgba(55, 65, 81, 0.5) !important;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* Keep subtle background for code blocks */
+.markdown-excerpt pre {
+  background-color: rgba(31, 41, 55, 0.5) !important;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+/* Override any MDEditor default backgrounds */
+.markdown-excerpt .wmde-markdown,
+.markdown-excerpt .wmde-markdown-var {
+  background-color: transparent !important;
+}
+
+/* Hide Chrome/Edge default password toggle */
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none;
+}
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
