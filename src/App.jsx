@@ -7,6 +7,7 @@ import Signup from "./pages/Signup";
 import Editor from "./pages/Editor";
 import PostPage from "./pages/PostPage";
 import MyPosts from "./pages/MyPosts";
+import EmailConfirm from "./pages/EmailConfirm";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/editor/:id" element={<Editor />} />
           <Route path="/post/:slug" element={<PostPage />} />
           <Route path="/me" element={<MyPosts />} />
+          <Route path="/auth/callback" element={<EmailConfirm />} />
         </Routes>
       </main>
     </div>

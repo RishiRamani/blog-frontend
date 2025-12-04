@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
+
 import { Mail, Lock, UserPlus, AlertCircle, Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
 
 // Toast Notification Component
@@ -84,7 +86,13 @@ export default function Signup() {
             }}
             onSubmit={async (values, { setSubmitting }) => {
               setSubmitting(true);
-              const { data, error } = await signup(values.email, values.password);
+              const { data, error } = await supabase.auth.signUp({
+  email: values.email,
+  password: values.password,
+  options: {
+    emailRedirectTo: `${window.location.origin}/auth/callback`
+  }
+});
               setSubmitting(false);
               
               if (error) {
