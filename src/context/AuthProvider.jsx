@@ -33,7 +33,14 @@ export default function AuthProvider({ children }) {
   }, []);
 
   const login = (email, password) => supabase.auth.signInWithPassword({ email, password });
-  const signup = (email, password) => supabase.auth.signUp({ email, password });
+ const signup = (email, password) =>
+  supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`
+    }
+  });
   const logout = () => supabase.auth.signOut();
 
   return (
