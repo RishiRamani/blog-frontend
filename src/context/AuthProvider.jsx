@@ -41,7 +41,7 @@ export default function AuthProvider({ children }) {
       emailRedirectTo: `${window.location.origin}/auth/callback`
     }
   });
-  const logout = () => supabase.auth.signOut();
+  const logout = () => supabase.auth.signOut({ scope: "global" });
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
