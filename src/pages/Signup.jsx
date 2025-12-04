@@ -86,13 +86,8 @@ export default function Signup() {
             }}
             onSubmit={async (values, { setSubmitting }) => {
               setSubmitting(true);
-              const { data, error } = await supabase.auth.signUp({
-  email: values.email,
-  password: values.password,
-  options: {
-    emailRedirectTo: `${window.location.origin}/auth/callback`
-  }
-});
+              const { data, error } = await signup(values.email, values.password);
+
               setSubmitting(false);
               
               if (error) {
