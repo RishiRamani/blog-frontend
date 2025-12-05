@@ -64,3 +64,21 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;  /* slate-600 */
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b; /* slate-500 */
+}
+
