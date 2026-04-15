@@ -9,7 +9,7 @@ html, body {
 }
 
 body {
-  overscroll-behavior: none; /* Disable rubber band effect */
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
