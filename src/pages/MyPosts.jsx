@@ -192,7 +192,7 @@ export default function MyPosts() {
             </p>
             <button
               onClick={() => nav("/editor")}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-indigo-500/20"
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-indigo-500/20"
             >
               Create Your First Post
             </button>
@@ -223,6 +223,18 @@ export default function MyPosts() {
                       <Calendar size={14} />
                       <time>{formatDate(p.updatedAt)}</time>
                     </div>
+                    {Array.isArray(p.tags) && p.tags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {p.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Action Buttons */}

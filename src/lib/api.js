@@ -11,9 +11,10 @@ function createHeaders(token) {
   return headers;
 }
 
-export async function fetchPosts({ q, page = 1, limit = 10 }, token) {
+export async function fetchPosts({ q, tag, page = 1, limit = 10 }, token) {
   const qs = new URLSearchParams();
   if (q) qs.set("q", q);
+  if (tag) qs.set("tag", tag);
   qs.set("page", String(page));
   qs.set("limit", String(limit));
 
@@ -33,9 +34,22 @@ export async function fetchPostBySlug(slug) {
   return res.json();
 }
 
+export async function addCommentToPost(slug, payload, token) {
+  const headers = createHeaders(token);
+  const res = await fetch(`${API}/posts/${encodeURIComponent(slug)}/comments`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || body.message || "Comment failed");
+  }
+  return res.json();
+}
+
 export async function createPost(payload, token) {
   const headers = createHeaders(token);
-  console.log(headers);
   const res = await fetch(`${API}/posts`, {
     method: "POST",
     headers,

@@ -5,6 +5,14 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { createPost, updatePost, fetchPostBySlug } from "../lib/api";
 import { useAuth } from "@clerk/clerk-react";
 
+const splitTags = (value) =>
+  value
+    .split(",")
+    .map((tag) => tag.trim().toLowerCase())
+    .filter(Boolean);
+
+const parseTags = (value) => [...new Set(splitTags(value))].slice(0, 10);
+
 export default function Editor() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -14,6 +22,7 @@ export default function Editor() {
     title: "",
     bannerImage: "",
     content: "",
+    tagsInput: "",
     published: false,
   });
 
@@ -26,6 +35,7 @@ export default function Editor() {
             title: p.title || "",
             bannerImage: p.bannerImage || "",
             content: p.content || "",
+            tagsInput: Array.isArray(p.tags) ? p.tags.join(", ") : "",
             published: p.published || false,
             _id: p._id,
           });
@@ -38,9 +48,9 @@ export default function Editor() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-8 text-center">
-          <p className="text-slate-300 text-lg">Loading...</p>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 text-center shadow-xl">
+          <p className="text-gray-300 text-lg">Loading...</p>
         </div>
       </div>
     );
@@ -48,23 +58,21 @@ export default function Editor() {
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-8 text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <p className="text-slate-300 text-lg">You must be logged in to create/edit posts.</p>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 text-center shadow-xl">
+          <div className="text-6xl mb-4">ðŸ”’</div>
+          <p className="text-gray-300 text-lg">You must be logged in to create/edit posts.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gray-950 py-8 px-4">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-indigo-600 p-6">
             <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-              <span>{id ? "✏️" : "✨"}</span>
               {id ? "Edit Post" : "Create New Post"}
             </h2>
           </div>
@@ -74,23 +82,43 @@ export default function Editor() {
             initialValues={initial}
             validate={(values) => {
               const errors = {};
-              if (!values.title || values.title.trim().length < 3) 
+              const rawTags = splitTags(values.tagsInput || "");
+
+              if (!values.title || values.title.trim().length < 3) {
                 errors.title = "Title required (min 3 chars)";
-              if (!values.bannerImage || !/^https?:\/\//.test(values.bannerImage)) 
+              }
+              if (!values.bannerImage || !/^https?:\/\//.test(values.bannerImage)) {
                 errors.bannerImage = "Valid image URL required";
-              if (!values.content || values.content.trim().length < 10) 
+              }
+              if (!values.content || values.content.trim().length < 10) {
                 errors.content = "Content must be at least 10 characters";
+              }
+              if (rawTags.length === 0) {
+                errors.tagsInput = "Add at least one tag";
+              } else if (rawTags.some((tag) => tag.length > 30)) {
+                errors.tagsInput = "Each tag must be 30 characters or less";
+              } else if (rawTags.length > 10) {
+                errors.tagsInput = "Use up to 10 tags";
+              }
+
               return errors;
             }}
             onSubmit={async (values, { setSubmitting, setStatus }) => {
               setSubmitting(true);
               try {
                 const token = await getToken();
+                const payload = {
+                  ...values,
+                  tags: parseTags(values.tagsInput || ""),
+                };
+                delete payload.tagsInput;
+
                 if (values._id) {
-                  await updatePost(values._id, values, token);
+                  await updatePost(values._id, payload, token);
                 } else {
-                  await createPost(values, token);
+                  await createPost(payload, token);
                 }
+
                 setSubmitting(false);
                 nav("/");
               } catch (err) {
@@ -99,21 +127,21 @@ export default function Editor() {
               }
             }}
           >
-            {({ values, setFieldValue, isSubmitting, status, errors }) => {
+            {({ values, setFieldValue, isSubmitting, status }) => {
               const contentLength = values.content?.trim().length || 0;
               const isContentValid = contentLength >= 10;
+              const previewTags = parseTags(values.tagsInput || "");
 
               return (
                 <Form className="p-8 space-y-6">
-                  {/* Title Field */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Post Title
                     </label>
                     <Field
                       name="title"
                       placeholder="Enter an engaging title..."
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                      className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     />
                     <ErrorMessage
                       name="title"
@@ -122,15 +150,14 @@ export default function Editor() {
                     />
                   </div>
 
-                  {/* Banner Image */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Cover Image URL
                     </label>
                     <Field
                       name="bannerImage"
                       placeholder="https://example.com/image.jpg"
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                      className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     />
                     <ErrorMessage
                       name="bannerImage"
@@ -138,7 +165,7 @@ export default function Editor() {
                       className="text-red-400 text-sm mt-1"
                     />
                     {values.bannerImage && /^https?:\/\//.test(values.bannerImage) && (
-                      <div className="mt-4 rounded-xl overflow-hidden border border-slate-600">
+                      <div className="mt-4 rounded-xl overflow-hidden border border-gray-700">
                         <img
                           src={values.bannerImage}
                           alt="cover preview"
@@ -148,22 +175,54 @@ export default function Editor() {
                     )}
                   </div>
 
-                  {/* Content Editor */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Tags
+                    </label>
+                    <Field
+                      name="tagsInput"
+                      placeholder="react, mongodb, clerk"
+                      className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    />
+                    <p className="mt-2 text-sm text-gray-400">
+                      Add 1 to 10 comma-separated tags to help readers discover the post.
+                    </p>
+                    <ErrorMessage
+                      name="tagsInput"
+                      component="div"
+                      className="text-red-400 text-sm mt-1"
+                    />
+                    {previewTags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {previewTags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-sm"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-slate-300">
+                      <label className="block text-sm font-medium text-gray-300">
                         Content (Markdown)
                       </label>
-                      <div className={`text-sm px-3 py-1 rounded-full ${
-                        isContentValid 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : 'bg-amber-500/20 text-amber-400'
-                      }`}>
-                        {contentLength} / 10 chars {isContentValid ? '✓' : '⚠️'}
+                      <div
+                        className={`text-sm px-3 py-1 rounded-full ${
+                          isContentValid
+                            ? "bg-green-500/20 text-green-400"
+                            : "bg-amber-500/20 text-amber-400"
+                        }`}
+                      >
+                        {contentLength} / 10 chars {isContentValid ? "✅" : "❌"}
                       </div>
                     </div>
-                    
-                    <div className="rounded-xl overflow-hidden border border-slate-600">
+
+                    <div className="rounded-xl overflow-hidden border border-gray-700">
                       <MDEditor
                         value={values.content}
                         onChange={(md) => setFieldValue("content", md)}
@@ -171,24 +230,22 @@ export default function Editor() {
                         data-color-mode="dark"
                       />
                     </div>
-                    
+
                     {!isContentValid && (
                       <div className="mt-2 flex items-center gap-2 text-amber-400 text-sm bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2">
-                        <span className="text-lg">⚠️</span>
                         <span>Content must be at least 10 characters to publish</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-700">
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-800">
                     <label className="inline-flex items-center gap-3 cursor-pointer group">
                       <Field
                         type="checkbox"
                         name="published"
-                        className="w-5 h-5 rounded bg-slate-900 border-slate-600 text-purple-600 focus:ring-purple-500 focus:ring-offset-slate-800"
+                        className="w-5 h-5 rounded bg-gray-950 border-gray-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-900"
                       />
-                      <span className="text-slate-300 group-hover:text-white transition">
+                      <span className="text-gray-300 group-hover:text-white transition">
                         Publish immediately
                       </span>
                     </label>
@@ -198,8 +255,8 @@ export default function Editor() {
                       disabled={isSubmitting || !isContentValid}
                       className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
                         isSubmitting || !isContentValid
-                          ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transform hover:scale-105'
+                          ? "bg-slate-700 text-slate-500 cursor-not-allowed"
+                          : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transform hover:scale-105"
                       }`}
                     >
                       {isSubmitting ? (
@@ -212,7 +269,6 @@ export default function Editor() {
                         </span>
                       ) : (
                         <span className="flex items-center gap-2">
-                          <span>🚀</span>
                           Publish Post
                         </span>
                       )}
@@ -221,22 +277,18 @@ export default function Editor() {
 
                   {status && (
                     <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 flex items-center gap-2">
-                      <span className="text-xl">❌</span>
+                      <span className="text-xl">âŒ</span>
                       {status}
                     </div>
                   )}
 
-                  {/* Live Preview */}
-                  <div className="mt-8 pt-8 border-t border-slate-700">
+                  <div className="mt-8 pt-8 border-t border-gray-800">
                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                      <span>👁️</span>
                       Live Preview
                     </h3>
-                    <div className="bg-slate-900/50 border border-slate-600 rounded-xl p-6 [&_.wmde-markdown]:!bg-transparent">
-                      <div className="prose prose-invert prose-purple max-w-none">
-                        <MDEditor.Markdown 
-                          source={values.content || "*Start typing to see preview...*"} 
-                        />
+                    <div className="bg-gray-950/70 border border-gray-700 rounded-xl p-6 [&_.wmde-markdown]:!bg-transparent">
+                      <div className="prose prose-invert max-w-none">
+                        <MDEditor.Markdown source={values.content || "*Start typing to see preview...*"} />
                       </div>
                     </div>
                   </div>

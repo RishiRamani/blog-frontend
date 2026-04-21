@@ -21,7 +21,7 @@ export default function Header() {
           {/* Logo */}
           <Link 
             to="/" 
-            className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent hover:from-indigo-300 hover:to-purple-300 transition-all duration-300"
+            className="text-2xl font-bold text-indigo-300 hover:text-indigo-200 transition-colors duration-300"
           >
             RBlogsЯ
           </Link>
@@ -46,7 +46,7 @@ export default function Header() {
                 </Link>
                 <Link 
                   to="/signup" 
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20"
                 >
                   Get Started
                 </Link>
@@ -55,7 +55,7 @@ export default function Header() {
               <>
                 <Link 
                   to="/editor" 
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20 flex items-center gap-2"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20 flex items-center gap-2"
                 >
                   <PenSquare size={16} />
                   Create Post
@@ -111,7 +111,7 @@ export default function Header() {
                   </Link>
                   <Link 
                     to="/signup" 
-                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20 text-center"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20 text-center"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Get Started
@@ -121,7 +121,7 @@ export default function Header() {
                 <>
                   <Link 
                     to="/editor" 
-                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <PenSquare size={18} />
