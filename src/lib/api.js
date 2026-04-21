@@ -1,4 +1,9 @@
-const API = import.meta.env.VITE_API_URL || "";
+const rawApiUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/+$/, "");
+const API = rawApiUrl
+  ? rawApiUrl.endsWith("/api")
+    ? rawApiUrl
+    : `${rawApiUrl}/api`
+  : "";
 
 // Helper to create auth headers with Clerk token
 function createHeaders(token) {
