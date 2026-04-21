@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthProvider";
+import { useUser, useClerk } from "@clerk/clerk-react";
 import { Menu, X, PenSquare, User, LogOut, Home } from "lucide-react";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const nav = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const onLogout = async () => {
-    await logout();
+    await signOut();
     nav("/");
   };
 

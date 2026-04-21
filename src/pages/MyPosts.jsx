@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchMyPosts, updatePost, deletePost } from "../lib/api";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
 import { Edit3, Trash2, Eye, EyeOff, Calendar, Loader2, FileText, AlertCircle } from "lucide-react";
 
 // Toast Notification Component
@@ -62,13 +63,17 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message }) {
 export default function MyPosts() {
   const qc = useQueryClient();
   const nav = useNavigate();
+  const { getToken } = useAuth();
   const [toast, setToast] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
-  const { data = [], isLoading, error } = useQuery({
+  const { data = { posts: [] }, isLoading, error } = useQuery({
     queryKey: ["myPosts"],
-    queryFn: fetchMyPosts,
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchMyPosts(token);
+    },
   });
 
   // Check for 403 session expired error
@@ -90,17 +95,9 @@ export default function MyPosts() {
   const toggleVisibility = async (post) => {
     setUpdatingId(post._id);
     try {
-      const result = await updatePost(post._id, { published: !post.published });
+      const token = await getToken();
+      const result = await updatePost(post._id, { published: !post.published }, token);
       
-      if (result?.error?.response?.status === 403) {
-        setToast({ 
-          message: "Your session has expired. Please login again.", 
-          type: "error" 
-        });
-        setTimeout(() => nav("/login"), 2000);
-        return;
-      }
-
       qc.invalidateQueries({ queryKey: ["myPosts"] });
       qc.invalidateQueries({ queryKey: ["posts"] });
       
@@ -110,7 +107,7 @@ export default function MyPosts() {
       });
     } catch (err) {
       setToast({ 
-        message: "Failed to update post visibility.", 
+        message: err.message || "Failed to update post visibility.", 
         type: "error" 
       });
     } finally {
@@ -120,17 +117,9 @@ export default function MyPosts() {
 
   const onDelete = async (post) => {
     try {
-      const result = await deletePost(post._id);
+      const token = await getToken();
+      await deletePost(post._id, token);
       
-      if (result?.error?.response?.status === 403) {
-        setToast({ 
-          message: "Your session has expired. Please login again.", 
-          type: "error" 
-        });
-        setTimeout(() => nav("/login"), 2000);
-        return;
-      }
-
       qc.invalidateQueries({ queryKey: ["myPosts"] });
       setToast({ 
         message: "Post deleted successfully!", 
@@ -138,7 +127,7 @@ export default function MyPosts() {
       });
     } catch (err) {
       setToast({ 
-        message: "Failed to delete post.", 
+        message: err.message || "Failed to delete post.", 
         type: "error" 
       });
     }
@@ -192,7 +181,7 @@ export default function MyPosts() {
         </div>
 
         {/* Posts List */}
-        {data.length === 0 ? (
+        {!data.posts || data.posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="bg-gray-800 rounded-full p-6 mb-6">
               <FileText className="text-gray-400" size={48} />
@@ -210,7 +199,7 @@ export default function MyPosts() {
           </div>
         ) : (
           <div className="space-y-4">
-            {data.map((p) => (
+            {data.posts.map((p) => (
               <div
                 key={p._id}
                 className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-all duration-200"

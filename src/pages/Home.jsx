@@ -3,11 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchPosts } from "../lib/api";
 import PostCard from "../components/PostCard";
 import { Search, Loader2, FileQuestion } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function Home() {
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const timerRef = useRef(null);
+  const {getToken} = useAuth();
 
   // Manual debounce
   useEffect(() => {
@@ -22,7 +24,11 @@ export default function Home() {
 
   const { data = [], isLoading, error } = useQuery({
     queryKey: ["posts", debouncedQ],
-    queryFn: () => fetchPosts({ q: debouncedQ }),
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchPosts({ q: debouncedQ }, token);
+    },
+    
     keepPreviousData: true,
   });
 

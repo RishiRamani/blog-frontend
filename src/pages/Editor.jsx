@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { createPost, updatePost, fetchPrivatePost } from "../lib/api";
-import { useAuth } from "../context/AuthProvider";
+import { createPost, updatePost, fetchPostBySlug } from "../lib/api";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function Editor() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
 
   const [initial, setInitial] = useState({
     title: "",
@@ -21,7 +21,7 @@ export default function Editor() {
     if (id) {
       (async () => {
         try {
-          const p = await fetchPrivatePost(id);
+          const p = await fetchPostBySlug(id);
           setInitial({
             title: p.title || "",
             bannerImage: p.bannerImage || "",
@@ -36,7 +36,17 @@ export default function Editor() {
     }
   }, [id]);
 
-  if (!user) {
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-8 text-center">
+          <p className="text-slate-300 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-8 text-center">
@@ -75,10 +85,11 @@ export default function Editor() {
             onSubmit={async (values, { setSubmitting, setStatus }) => {
               setSubmitting(true);
               try {
+                const token = await getToken();
                 if (values._id) {
-                  await updatePost(values._id, values);
+                  await updatePost(values._id, values, token);
                 } else {
-                  await createPost(values);
+                  await createPost(values, token);
                 }
                 setSubmitting(false);
                 nav("/");
