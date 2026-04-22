@@ -49,7 +49,7 @@ export default function Login() {
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-8 space-y-6"
       >
-        <h2 className="text-3xl font-bold text-white text-center">Sign In</h2>
+        <h2 className="text-3xl font-bold text-white text-center">Log In</h2>
 
         {error && (
           <div className="text-red-400 text-sm text-center">{error}</div>
