@@ -10,7 +10,7 @@ import MyPosts from "./pages/MyPosts";
 
 export default function App() {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-950 pt-16">
       <Header />
       <main>
         <Routes>
