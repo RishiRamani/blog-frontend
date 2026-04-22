@@ -23,7 +23,7 @@ export default function Header() {
             to="/" 
             className="text-2xl font-bold text-indigo-300 hover:text-indigo-200 transition-colors duration-300"
           >
-            RBlogsЯ
+            Blog App
           </Link>
 
           {/* Desktop Navigation */}

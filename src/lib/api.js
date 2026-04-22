@@ -121,3 +121,9 @@ export async function fetchUserPublishedPosts(authorId, page = 1, limit = 10) {
   return res.json();
 }
 
+export async function fetchAllTags(token) {
+  const headers = createHeaders(token);
+  const res = await fetch(`${API}/posts/tags`, { headers });
+  if (!res.ok) throw new Error("Failed to fetch tags");
+  return res.json(); // expects string[]
+}

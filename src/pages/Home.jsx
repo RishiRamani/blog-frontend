@@ -14,11 +14,7 @@ export default function Home() {
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
-
-    timerRef.current = setTimeout(() => {
-      setDebouncedQ(q.trim());
-    }, 300);
-
+    timerRef.current = setTimeout(() => setDebouncedQ(q.trim()), 300);
     return () => clearTimeout(timerRef.current);
   }, [q]);
 
@@ -33,8 +29,7 @@ export default function Home() {
 
   useEffect(() => {
     if (error?.response?.status === 403) {
-      const event = new CustomEvent("sessionExpired");
-      window.dispatchEvent(event);
+      window.dispatchEvent(new CustomEvent("sessionExpired"));
     }
   }, [error]);
 
@@ -45,7 +40,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 py-8">
-      <div className="container mx-auto px-4 max-w-5xl">
+      <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-indigo-300 mb-4">
             Discover Blogs
@@ -55,6 +50,7 @@ export default function Home() {
           </p>
         </div>
 
+        {/* Search */}
         <div className="mb-8">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -76,20 +72,17 @@ export default function Home() {
           {(debouncedQ || selectedTag) && (
             <p className="text-sm text-gray-400 mt-2 ml-1">
               {debouncedQ && (
-                <>
-                  Searching for: <span className="text-indigo-400 font-medium">"{debouncedQ}"</span>
-                </>
+                <>Searching for: <span className="text-indigo-400 font-medium">"{debouncedQ}"</span></>
               )}
               {debouncedQ && selectedTag && <span className="mx-2 text-gray-600">•</span>}
               {selectedTag && (
-                <>
-                  Filtering tag: <span className="text-indigo-400 font-medium">#{selectedTag}</span>
-                </>
+                <>Filtering tag: <span className="text-indigo-400 font-medium">#{selectedTag}</span></>
               )}
             </p>
           )}
         </div>
 
+        {/* Tag filters */}
         {popularTags.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between gap-4 mb-3">
@@ -126,6 +119,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* Posts grid */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="animate-spin text-indigo-400 mb-4" size={48} />
@@ -133,7 +127,7 @@ export default function Home() {
           </div>
         ) : error ? (
           <div className="bg-red-900/20 border border-red-800 rounded-xl p-6 text-center">
-            <div className="text-red-400 mb-2">
+            <div className="text-red-400">
               {error?.response?.status === 403
                 ? "Your session has expired. Please login again."
                 : "Failed to load posts. Please try again."}
@@ -152,7 +146,8 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6">
+          // ✅ Responsive 2-3 column grid
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.map((p) => (
               <PostCard post={p} key={p._id} />
             ))}
