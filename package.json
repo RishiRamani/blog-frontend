@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.5",
+    "@clerk/themes": "^2.4.57",
     "@tanstack/react-query": "^5.90.11",
     "@uiw/react-md-editor": "^4.0.10",
     "formik": "^2.4.9",

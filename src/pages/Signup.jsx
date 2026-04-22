@@ -1,5 +1,6 @@
 import React from "react";
 import { SignUp } from "@clerk/clerk-react";
+import {dark} from "@clerk/themes";
 
 export default function Signup() {
   return (
@@ -21,31 +22,8 @@ export default function Signup() {
           <SignUp
             afterSignUpUrl="/"
             appearance={{
-              baseTheme: undefined,
-              variables: {
-                colorPrimary: "#4f46e5",
-                colorBackground: "#111827",
-                colorInputBackground: "#111827",
-                colorInputBorder: "#374151",
-                colorText: "#f3f4f6",
-                colorTextSecondary: "#cbd5e1",
-                colorDanger: "#f87171",
-              },
-              elements: {
-                rootBox: "max-w-md mx-auto w-full",
-                card: "bg-gray-900/95 border border-gray-800 rounded-2xl shadow-2xl backdrop-blur",
-                headerTitle: "text-3xl font-bold text-white",
-                headerSubtitle: "text-gray-400",
-                formButtonPrimary: "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20",
-                formFieldInput: "bg-gray-800 border border-gray-700 text-white",
-                formFieldLabel: "text-gray-300",
-                socialButtonsBlockButton: "bg-gray-800 border border-gray-700 text-gray-100 hover:bg-gray-700",
-                socialButtonsBlockButtonText: "text-gray-100",
-                dividerLine: "bg-gray-700",
-                dividerText: "text-gray-500",
-                footer: "bg-transparent",
-                footerActionLink: "text-indigo-400 hover:text-indigo-300",
-              },
+              baseTheme: dark,
+              
             }}
           />
         </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { addCommentToPost, fetchPostBySlug } from "../lib/api";
+import { usePost, useAddComment } from "../hooks/usePosts";
 import MDEditor from "@uiw/react-md-editor";
 import { Calendar, Share2, Check, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 import { useAuth, useUser } from "@clerk/clerk-react";
@@ -31,17 +30,13 @@ function Toast({ message, type = "success", onClose }) {
 export default function PostPage() {
   const { slug } = useParams();
   const nav = useNavigate();
-  const qc = useQueryClient();
   const { isSignedIn, getToken } = useAuth();
   const { user } = useUser();
   const [toast, setToast] = useState(null);
   const [comment, setComment] = useState("");
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  const { data: post, isLoading, error } = useQuery({
-    queryKey: ["post", slug],
-    queryFn: () => fetchPostBySlug(slug),
-  });
+  const { data: post, isLoading, error } = usePost(slug);
+  const addCommentMutation = useAddComment();
 
   // Check for 403 session expired error
   useEffect(() => {
@@ -118,18 +113,17 @@ export default function PostPage() {
       return;
     }
 
-    setIsSubmittingComment(true);
-
     try {
       const token = await getToken();
-      await addCommentToPost(slug, { authorName, content: trimmed }, token);
+      await addCommentMutation.mutateAsync({ 
+        slug, 
+        payload: { authorName, content: trimmed }, 
+        token 
+      });
       setComment("");
-      await qc.invalidateQueries({ queryKey: ["post", slug] });
       setToast({ message: "Comment posted.", type: "success" });
     } catch (err) {
       setToast({ message: err.message || "Failed to post comment.", type: "error" });
-    } finally {
-      setIsSubmittingComment(false);
     }
   };
 
@@ -280,7 +274,7 @@ export default function PostPage() {
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
                   placeholder={isSignedIn ? "Share your thoughts about this post..." : "Sign in to join the discussion"}
-                  disabled={!isSignedIn || isSubmittingComment}
+                  disabled={!isSignedIn || addCommentMutation.isPending}
                   rows={4}
                   className="w-full rounded-xl border border-gray-700 bg-gray-950 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
@@ -290,10 +284,10 @@ export default function PostPage() {
                   </p>
                   <button
                     type="submit"
-                    disabled={!isSignedIn || isSubmittingComment || comment.trim().length < 2}
+                    disabled={!isSignedIn || addCommentMutation.isPending || comment.trim().length < 2}
                     className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium transition-colors"
                   >
-                    {isSubmittingComment ? "Posting..." : "Post comment"}
+                    {addCommentMutation.isPending ? "Posting..." : "Post comment"}
                   </button>
                 </div>
               </form>

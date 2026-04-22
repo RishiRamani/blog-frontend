@@ -96,13 +96,13 @@ export default function MyPosts() {
     setUpdatingId(post._id);
     try {
       const token = await getToken();
-      const result = await updatePost(post._id, { published: !post.published }, token);
+      await updatePost(post._id, { published: !post.published }, token);
       
       qc.invalidateQueries({ queryKey: ["myPosts"] });
       qc.invalidateQueries({ queryKey: ["posts"] });
       
       setToast({ 
-        message: `Post ${post.published ? "hidden" : "published"} successfully!`, 
+        message: `Post ${!post.published ? "published" : "hidden"} successfully!`, 
         type: "success" 
       });
     } catch (err) {

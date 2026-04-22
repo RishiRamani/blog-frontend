@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { createPost, updatePost, fetchPostBySlug } from "../lib/api";
+import { useCreatePost, useUpdatePost, usePost } from "../hooks/usePosts";
 import { useAuth } from "@clerk/clerk-react";
 
 const splitTags = (value) =>
@@ -17,6 +17,9 @@ export default function Editor() {
   const { id } = useParams();
   const nav = useNavigate();
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { data: postData } = usePost(id);
+  const createMutation = useCreatePost();
+  const updateMutation = useUpdatePost();
 
   const [initial, setInitial] = useState({
     title: "",
@@ -26,25 +29,18 @@ export default function Editor() {
     published: false,
   });
 
-  useEffect(() => {
-    if (id) {
-      (async () => {
-        try {
-          const p = await fetchPostBySlug(id);
-          setInitial({
-            title: p.title || "",
-            bannerImage: p.bannerImage || "",
-            content: p.content || "",
-            tagsInput: Array.isArray(p.tags) ? p.tags.join(", ") : "",
-            published: p.published || false,
-            _id: p._id,
-          });
-        } catch (err) {
-          console.error(err);
-        }
-      })();
+  React.useEffect(() => {
+    if (id && postData) {
+      setInitial({
+        title: postData.title || "",
+        bannerImage: postData.bannerImage || "",
+        content: postData.content || "",
+        tagsInput: Array.isArray(postData.tags) ? postData.tags.join(", ") : "",
+        published: postData.published || false,
+        _id: postData._id,
+      });
     }
-  }, [id]);
+  }, [id, postData]);
 
   if (!isLoaded) {
     return (
@@ -114,9 +110,9 @@ export default function Editor() {
                 delete payload.tagsInput;
 
                 if (values._id) {
-                  await updatePost(values._id, payload, token);
+                  await updateMutation.mutateAsync({ id: values._id, payload, token });
                 } else {
-                  await createPost(payload, token);
+                  await createMutation.mutateAsync({ payload, token });
                 }
 
                 setSubmitting(false);
