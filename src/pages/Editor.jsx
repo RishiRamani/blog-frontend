@@ -141,7 +141,8 @@ export default function Editor() {
                     <Field
                       name="title"
                       placeholder="Enter an engaging title..."
-                      className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     />
                     <ErrorMessage
                       name="title"
